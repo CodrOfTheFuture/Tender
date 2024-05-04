@@ -12,23 +12,60 @@
             background-color: rgb(243, 206, 44);
             border-radius: 40px; /* Make it a circle */
             top: 250px;
-            left:100px;
-            position: absolute; /* Add position */
-        }
-
-        .scroll {
-            width: 350px;
-            height: 700px;
-            background-color: rgb(255, 98, 0);
-            border-radius: 40px;
-            top: 100px;
-            left: 600px;
+            left: 100px;
             position: absolute; /* Add position */
         }
     </style>
 </head>
 <body>
-    <div class="scroll"></div>
+    <div id="card" class="card">
+        <img src="../assets/Tender logo.png" alt="logo">
+        <div class="info">
+            <h2>John Doe</h2>
+            <p>Age: 25</p>
+            <p>Location: New York</p>
+        </div>
+    </div>
     <div class="oval"></div>
+    <script>
+        const card = document.getElementById('card');
+        let isDragging = false;
+        let animationFrameId;
+
+        document.addEventListener('keydown', startDrag);
+        document.addEventListener('keyup', endDrag);
+
+        function startDrag(e) {
+            if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isDragging) {
+                isDragging = true;
+                animationFrameId = requestAnimationFrame(() => {
+                    drag(e.key);
+                });
+            }
+        }
+
+        function drag(key) {
+            if (!isDragging) return;
+            let offsetX = 0;
+            if (key === 'ArrowRight') {
+                offsetX = 10; // Adjust the speed as needed
+            } else if (key === 'ArrowLeft') {
+                offsetX = -10; // Adjust the speed as needed
+            }
+            const currentTransform = card.style.transform.replace(/[^\d.-]/g, '');
+            const newX = (currentTransform ? parseFloat(currentTransform) : 0) + offsetX;
+            card.style.transform = `translateX(${newX}px)`;
+            animationFrameId = requestAnimationFrame(() => {
+                drag(key);
+            });
+        }
+
+        function endDrag(e) {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                isDragging = false;
+                cancelAnimationFrame(animationFrameId);
+            }
+        }
+    </script>
 </body>
 </html>
