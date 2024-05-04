@@ -6,7 +6,7 @@
     <title>Tinder-like Draggable Cards</title>
     <style>
         body {
-            background-color: #FFA500; /* Orange */
+            background-image: linear-gradient(-45deg, #FFA500, #FF4500);
             margin: 0;
             padding: 0;
             height: 100vh;
@@ -21,7 +21,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #FFFF00; /* Yellow */
+            background-color: rgba(255, 255, 255, 0.8);
             padding: 20px;
             border-radius: 20px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
@@ -34,8 +34,10 @@
         .search-input {
             padding: 8px;
             font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
 
         .card-container {
@@ -57,7 +59,6 @@
             border-radius: 20px;
             overflow: hidden;
             background-color: #ffffff;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
             cursor: pointer;
             transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s ease;
             will-change: transform;
@@ -91,27 +92,47 @@
             font-size: 16px;
         }
 
+        /* Swipe animation */
+        @keyframes swipe-right {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(200%);
+                opacity: 0;
+            }
+        }
+
+        @keyframes swipe-left {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(-200%);
+                opacity: 0;
+            }
+        }
+
+        .swipe-right {
+            animation: swipe-right 0.5s ease;
+        }
+
+        .swipe-left {
+            animation: swipe-left 0.5s ease;
+        }
+
         /* Dropdown button and content */
+        .search-container {
+            position: relative;
+        }
+
         .dropdown {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 90%;
+            right: 40px; /* Adjust this value as needed */
+            transform: translateY(-50%);
             display: inline-block;
             z-index: 2;
-        }
-
-        .dropdown-button {
-            padding: 10px 20px;
-            border-radius: 20px;
-            background-color: #FF4500; /* OrangeRed */
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .dropdown-button:hover {
-            background-color: #FF6347; /* Tomato */
         }
 
         .dropdown-content {
@@ -145,12 +166,6 @@
             background-color: #ddd;
         }
 
-        /* Favorites link */
-        .favorites-link {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-
         /* Popup for text instructions */
         .popup {
             position: fixed;
@@ -159,7 +174,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            display: none;
+            display: flex;
             justify-content: center;
             align-items: center;
             z-index: 9999;
@@ -173,6 +188,7 @@
             max-height: 80%;
             overflow: auto;
             position: relative;
+            text-align: center;
         }
 
         .popup-exit {
@@ -183,87 +199,67 @@
             font-size: 20px;
         }
 
-        .favorites-container {
-            margin-top: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .favorites-card {
-            position: relative;
-            width: 200px;
-            margin: 10px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        .favorites-card img {
-            width: 100%;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-        }
-
-        .favorites-card .caption {
-            padding: 5px;
-            text-align: center;
-            background-color: #f9f9f9;
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
-        }
-
-        .favorites-card .caption h3 {
-            margin: 5px 0;
-            font-size: 14px;
+        /* Heart button */
+        .favorites-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: transparent;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            color: red;
+            cursor: pointer;
+            z-index: 999;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="search-container">
-            <input type="text" class="search-input" placeholder="Search..." oninput="filterCards(this.value)">
+            <input type="text" class="search-input" placeholder="Search...">
         </div>
         <div class="card-container"></div>
         <div class="dropdown">
-            <button class="dropdown-button">Instructions</button>
+            <button class="dropdown-button" style="border-radius: 20px; background-color: #FF4500; color: white; border: none; padding: 10px 20px; cursor: pointer;">Instructions</button>
             <div class="dropdown-content">
                 <button class="video-instructions-button">Video Instructions</button>
                 <button class="text-instructions-button">Text Instructions</button>
+                <div class="favorites-container"></div>
             </div>
         </div>
     </div>
 
-    <div class="favorites-container"></div>
 
-    <div class="popup" id="textInstructionsPopup">
-        <div class="popup-content">
-            <span class="popup-exit" onclick="closePopup()">&times;</span>
-            <h2>Text Instructions</h2>
-            <p id="textInstructionsContent"></p>
-        </div>
-    </div>
+
+    <button class="favorites-button" onclick="viewFavorites()">❤️</button>
 
     <script>
         const cardContainer = document.querySelector('.card-container');
-        const favoritesContainer = document.querySelector('.favorites-container');
-        let allCards = [];
 
-        // Function to fetch meal data from the API
-        async function fetchMealData() {
-            try {
-                const response = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
-                const data = await response.json();
+        // Function to fetch meal data from the API based on search term
+        async function fetchMealData(searchTerm = '') {
+            let url = 'https://www.themealdb.com/api/json/v1/1/random.php';
+            if (searchTerm) {
+                url = `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchTerm)}`;
+            }
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data.meals) {
                 return data.meals[0];
-            } catch (error) {
-                console.error('Error fetching meal data:', error);
+            } else {
+                alert('No meals found for the provided search term.');
+                return null;
             }
         }
 
-        // Function to create a card with meal data
-        async function createCard() {
-            const mealData = await fetchMealData();
-            if (!mealData) return; // Handle empty response
+        // Function to create a card with meal data based on search input
+        async function createCard(searchTerm = '') {
+            const mealData = await fetchMealData(searchTerm);
+            if (!mealData) return; // If no data is returned, exit the function
+
             const card = document.createElement('div');
             card.classList.add('card');
 
@@ -283,9 +279,9 @@
             card.appendChild(caption);
             cardContainer.appendChild(card);
 
-            allCards.push({
-                card,
-                mealName: mealData.strMeal.toLowerCase()
+            // Event listener for swiping right
+            card.addEventListener('click', () => {
+                swipeCard(card, 'right');
             });
 
             // Event listener for swiping left
@@ -295,36 +291,56 @@
             });
         }
 
-        // Function to handle card swipe
+        // Function to handle swipe animation
         function swipeCard(card, direction) {
+            card.classList.add(direction === 'right' ? 'swipe-right' : 'swipe-left');
+
             if (direction === 'right') {
-                const clonedCard = card.cloneNode(true);
-                favoritesContainer.appendChild(clonedCard);
-                saveFavorites();
-            } else {
-                card.classList.add('swipe-left');
-                setTimeout(() => {
-                    card.remove();
-                }, 500);
+                // Store favorite card data in localStorage
+                const favoriteCards = JSON.parse(localStorage.getItem('favoriteCards')) || [];
+                const cardData = {
+                    meal: card.querySelector('h2').innerText,
+                    category: card.querySelector('p:nth-of-type(1)').innerText,
+                    area: card.querySelector('p:nth-of-type(2)').innerText,
+                    image: card.querySelector('img').src
+                };
+                favoriteCards.push(cardData);
+                localStorage.setItem('favoriteCards', JSON.stringify(favoriteCards));
             }
+
+            setTimeout(() => {
+                card.remove();
+            }, 500);
+
             createCard();
         }
 
-        // Initial card creation
+        // Event listener for search input
+        const searchInput = document.querySelector('.search-input');
+        searchInput.addEventListener('input', () => {
+            const searchTerm = searchInput.value.trim();
+            cardContainer.innerHTML = ''; // Clear previous cards
+            if (searchTerm) {
+                createCard(searchTerm); // Create card based on search term
+            } else {
+                createCard(); // Create random card if search term is empty
+            }
+        });
+
+        // Initial card creation (random meal)
         createCard();
 
         // Event listener for arrow key press
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
                 const currentCard = document.querySelector('.card');
-                swipeCard(currentCard, 'left');
+                swipeCard(currentCard, e.key === 'ArrowLeft' ? 'left' : 'right');
             }
         });
 
         // Event listener for video instructions button
         document.querySelector('.video-instructions-button').addEventListener('click', async () => {
             const mealData = await fetchMealData();
-            if (!mealData) return; // Handle empty response
             const youtubeLink = mealData.strYoutube;
             window.open(youtubeLink, '_blank');
         });
@@ -332,7 +348,6 @@
         // Event listener for text instructions button
         document.querySelector('.text-instructions-button').addEventListener('click', async () => {
             const mealData = await fetchMealData();
-            if (!mealData) return; // Handle empty response
             const instructions = mealData.strInstructions;
             document.getElementById('textInstructionsContent').innerText = instructions;
             openPopup();
@@ -348,48 +363,10 @@
             document.getElementById('textInstructionsPopup').style.display = 'none';
         }
 
-        // Function to filter cards based on search input
-        function filterCards(keyword) {
-            const filteredCards = allCards.filter(card => card.mealName.includes(keyword.toLowerCase()));
-            cardContainer.innerHTML = '';
-            filteredCards.forEach(card => {
-                cardContainer.appendChild(card.card);
-            });
+        // Function to view favorite cards
+        function viewFavorites() {
+            window.open('fav.html', '_self');
         }
-
-        // Function to save favorited cards
-        function saveFavorites() {
-            const favoritesHTML = favoritesContainer.innerHTML;
-            localStorage.setItem('favorites', favoritesHTML);
-        }
-
-        // Function to load favorited cards from local storage
-        function loadFavorites() {
-            const favoritesHTML = localStorage.getItem('favorites');
-            if (favoritesHTML) {
-                favoritesContainer.innerHTML = favoritesHTML;
-            }
-        }
-
-        // Load favorited cards on page load
-        loadFavorites();
-        // Add swipe animation with arrow keys
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-        const currentCard = document.querySelector('.card');
-        swipeCard(currentCard, e.key === 'ArrowRight' ? 'right' : 'left');
-    }
-});
-
-// Function to filter cards based on search input
-function filterCards(keyword) {
-    const filteredCards = allCards.filter(card => card.mealName.includes(keyword.toLowerCase()));
-    cardContainer.innerHTML = '';
-    filteredCards.forEach(card => {
-        cardContainer.appendChild(card.card);
-    });
-}
-
     </script>
 </body>
 </html>
