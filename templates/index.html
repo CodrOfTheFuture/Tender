@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tinder-like Draggable Card</title>
+    <title>Tinder-like Draggable Cards</title>
     <style>
         body {
-            background-image: linear-gradient(-45deg, #F6E2B6, var(--4));
+            background-image: linear-gradient(-45deg, #F6E2B6, var(--color-4));
             margin: 0;
             padding: 0;
             height: 100vh;
@@ -19,49 +19,56 @@
             position: relative;
             width: 300px;
             height: 400px;
+            overflow: hidden;
         }
 
         .card {
-            width: 100%;
-            height: 100%;
+            width: calc(100% - 6px); /* Adjusted width to accommodate border */
+            height: calc(100% - 6px); /* Adjusted height to accommodate border */
             position: absolute;
             top: 0;
             left: 0;
-            border-radius: 20px;
+            border-radius: 30px;
             overflow: hidden;
             background-color: #ffffff;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             cursor: pointer;
-            transition: transform 0.3s ease;
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s ease;
             will-change: transform;
+            z-index: 1;
+            border: 3px solid #ccc; /* Increased border thickness */
         }
 
         .card img {
             width: 100%;
             height: 70%;
             object-fit: cover;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            pointer-events: none;
         }
 
         .info {
-            padding: 20px;
+            padding: 30px;
+            pointer-events: none;
         }
 
-        .info h2 {
+        .info h2,
+        .info p {
             margin: 0;
             font-size: 20px;
+            pointer-events: none;
         }
 
-        .info p {
-            margin: 5px 0;
-            font-size: 16px;
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="card-container">
-        <div id="card" class="card">
+        <!-- Example of multiple cards -->
+        <div class="card" style="z-index: 3;">
             <img src="../assets/Tender logo.png" alt="logo">
             <div class="info">
                 <h2>John Doe</h2>
@@ -69,47 +76,57 @@
                 <p>Location: New York</p>
             </div>
         </div>
+        <div class="card" style="z-index: 2;">
+            <img src="../assets/Tender logo.png" alt="logo">
+            <div class="info">
+                <h2>Jane Smith</h2>
+                <p>Age: 30</p>
+                <p>Location: Los Angeles</p>
+            </div>
+        </div>
+        <div class="card" style="z-index: 1;">
+            <img src="../assets/Tender logo.png" alt="logo">
+            <div class="info">
+                <h2>Michael Johnson</h2>
+                <p>Age: 28</p>
+                <p>Location: Chicago</p>
+            </div>
+        </div>
     </div>
 
     <script>
         const cardContainer = document.querySelector('.card-container');
-        const card = document.getElementById('card');
-        let originalX = 0;
-        let isDragging = false;
+        const cards = document.querySelectorAll('.card');
+        const numCards = cards.length;
+        let currentIndex = 0;
 
-        card.addEventListener('mousedown', startDrag);
-        card.addEventListener('mouseup', endDrag);
+        document.addEventListener('keydown', startDrag);
 
         function startDrag(e) {
-            isDragging = true;
-            originalX = e.clientX;
-            card.style.transition = 'none';
-            card.addEventListener('mousemove', drag);
-        }
-
-        function drag(e) {
-            if (isDragging) {
-                const offsetX = e.clientX - originalX;
-                card.style.transform = `translateX(${offsetX}px) rotate(${offsetX / 10}deg)`;
-                if (Math.abs(offsetX) > cardContainer.offsetWidth * 0.3) {
-                    card.style.opacity = '0';
-                } else {
-                    card.style.opacity = '1';
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                const currentCard = cards[currentIndex];
+                let nextIndex;
+                if (e.key === 'ArrowLeft') {
+                    nextIndex = (currentIndex - 1 + numCards) % numCards;
+                } else if (e.key === 'ArrowRight') {
+                    nextIndex = (currentIndex + 1) % numCards;
                 }
-            }
-        }
+                const nextCard = cards[nextIndex];
 
-        function endDrag(e) {
-            if (isDragging) {
-                isDragging = false;
-                card.removeEventListener('mousemove', drag);
-                card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-                card.style.transform = 'translateX(0) rotate(0)';
-                card.style.opacity = '1';
-                if (Math.abs(e.clientX - originalX) > cardContainer.offsetWidth * 0.3) {
-                    // Remove the card from the DOM or perform other actions here
-                    console.log('Card removed!');
-                }
+                currentCard.style.transition = 'transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s ease';
+                currentCard.style.transform = 'translateX(' + (e.key === 'ArrowLeft' ? '-150%' : '150%') + ') rotate(' + (e.key === 'ArrowLeft' ? '-15deg' : '15deg') + ')';
+                currentCard.style.opacity = '0';
+
+                // Remove the card from the DOM after the transition ends
+                currentCard.addEventListener('transitionend', () => {
+                    currentCard.classList.add('hidden');
+                });
+
+                currentIndex = nextIndex;
+
+                nextCard.style.transition = 'transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s ease';
+                nextCard.style.transform = 'none';
+                nextCard.style.opacity = '1';
             }
         }
     </script>
