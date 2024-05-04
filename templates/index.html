@@ -3,67 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../css/home.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <title>Tinder-like Draggable Card</title>
     <style>
-        .oval {
-            width: 60px;
-            height: 300px;
-            background-color: rgb(243, 206, 44);
-            border-radius: 40px; /* Make it a circle */
-            top: 250px;
-            left: 100px;
-            position: absolute; /* Add position */
+        body {
+            background-image: linear-gradient(-45deg, #F6E2B6, var(--4));
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-container {
+            position: relative;
+            width: 300px;
+            height: 400px;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            will-change: transform;
+        }
+
+        .card img {
+            width: 100%;
+            height: 70%;
+            object-fit: cover;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .info {
+            padding: 20px;
+        }
+
+        .info h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .info p {
+            margin: 5px 0;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
-    <div id="card" class="card">
-        <img src="../assets/Tender logo.png" alt="logo">
-        <div class="info">
-            <h2>John Doe</h2>
-            <p>Age: 25</p>
-            <p>Location: New York</p>
+    <div class="card-container">
+        <div id="card" class="card">
+            <img src="../assets/Tender logo.png" alt="logo">
+            <div class="info">
+                <h2>John Doe</h2>
+                <p>Age: 25</p>
+                <p>Location: New York</p>
+            </div>
         </div>
     </div>
-    <div class="oval"></div>
-    <script>
-        const card = document.getElementById('card');
-        let isDragging = false;
-        let animationFrameId;
 
-        document.addEventListener('keydown', startDrag);
-        document.addEventListener('keyup', endDrag);
+    <script>
+        const cardContainer = document.querySelector('.card-container');
+        const card = document.getElementById('card');
+        let originalX = 0;
+        let isDragging = false;
+
+        card.addEventListener('mousedown', startDrag);
+        card.addEventListener('mouseup', endDrag);
 
         function startDrag(e) {
-            if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !isDragging) {
-                isDragging = true;
-                animationFrameId = requestAnimationFrame(() => {
-                    drag(e.key);
-                });
-            }
+            isDragging = true;
+            originalX = e.clientX;
+            card.style.transition = 'none';
+            card.addEventListener('mousemove', drag);
         }
 
-        function drag(key) {
-            if (!isDragging) return;
-            let offsetX = 0;
-            if (key === 'ArrowRight') {
-                offsetX = 10; // Adjust the speed as needed
-            } else if (key === 'ArrowLeft') {
-                offsetX = -10; // Adjust the speed as needed
+        function drag(e) {
+            if (isDragging) {
+                const offsetX = e.clientX - originalX;
+                card.style.transform = `translateX(${offsetX}px) rotate(${offsetX / 10}deg)`;
+                if (Math.abs(offsetX) > cardContainer.offsetWidth * 0.3) {
+                    card.style.opacity = '0';
+                } else {
+                    card.style.opacity = '1';
+                }
             }
-            const currentTransform = card.style.transform.replace(/[^\d.-]/g, '');
-            const newX = (currentTransform ? parseFloat(currentTransform) : 0) + offsetX;
-            card.style.transform = `translateX(${newX}px)`;
-            animationFrameId = requestAnimationFrame(() => {
-                drag(key);
-            });
         }
 
         function endDrag(e) {
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            if (isDragging) {
                 isDragging = false;
-                cancelAnimationFrame(animationFrameId);
+                card.removeEventListener('mousemove', drag);
+                card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+                card.style.transform = 'translateX(0) rotate(0)';
+                card.style.opacity = '1';
+                if (Math.abs(e.clientX - originalX) > cardContainer.offsetWidth * 0.3) {
+                    // Remove the card from the DOM or perform other actions here
+                    console.log('Card removed!');
+                }
             }
         }
     </script>
