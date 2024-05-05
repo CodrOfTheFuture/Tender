@@ -1,38 +1,225 @@
 body {
-    background-image: linear-gradient(-45deg, #F6E2B6, var(--4));
+    background-image: linear-gradient(-45deg, #FFA500, #FF4500);
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.search-container {
+    margin-bottom: 20px;
+}
+
+.search-input {
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.card-container {
+    position: relative;
+    width: 80vw;
+    max-width: 400px;
+    height: 60vh;
+    max-height: 500px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; /* Align items to the bottom */
 }
 
 .card {
-    width: 300px;
-    height: 400px;
-    position: relative;
-    margin: auto;
+    position: absolute;
+    width: calc(100% - 20px); /* Adjusted width to accommodate border */
+    height: calc(100% - 20px); /* Adjusted height to accommodate border */
     border-radius: 20px;
     overflow: hidden;
     background-color: #ffffff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s ease;
+    will-change: transform;
+    z-index: 1;
+    border: 3px solid #ccc; /* Increased border thickness */
 }
 
 .card img {
     width: 100%;
-    height: 70%;
+    height: 80%; /* Adjusted height to accommodate image and caption */
     object-fit: cover;
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
+    pointer-events: none;
 }
 
-.info {
-    padding: 20px;
+.caption {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    box-sizing: border-box;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
 }
 
-.info h2 {
+.caption h2,
+.caption p {
     margin: 0;
+    font-size: 16px;
+}
+
+/* Swipe animation */
+@keyframes swipe-right {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(200%);
+        opacity: 0;
+    }
+}
+
+@keyframes swipe-left {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-200%);
+        opacity: 0;
+    }
+}
+
+.swipe-right {
+    animation: swipe-right 0.5s ease;
+}
+
+.swipe-left {
+    animation: swipe-left 0.5s ease;
+}
+
+/* Dropdown button and content */
+.search-container {
+    position: relative;
+}
+
+.dropdown {
+    position: absolute;
+    top: 90%;
+    right: 40px; /* Adjust this value as needed */
+    transform: translateY(-50%);
+    display: inline-block;
+    z-index: 2;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 12px 16px;
+    z-index: 1;
+    border-radius: 5px;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-content button {
+    display: block;
+    width: 100%;
+    padding: 8px 0;
+    margin-bottom: 8px;
+    background-color: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-content button:hover {
+    background-color: #ddd;
+}
+
+/* Heart button */
+.favorites-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: transparent;
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    color: red;
+    cursor: pointer;
+    z-index: 999;
+}
+
+/* Popup for text instructions */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 80%;
+    max-height: 80%;
+    overflow: auto;
+    position: relative;
+    text-align: center;
+}
+
+.popup-exit {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
     font-size: 20px;
 }
 
-.info p {
-    margin: 5px 0;
-    font-size: 16px;
+.logo-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 999;
+}
+
+.logo-container img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: white;
+    padding: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
